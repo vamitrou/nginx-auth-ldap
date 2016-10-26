@@ -1092,12 +1092,14 @@ ngx_http_auth_ldap_get_connection(ngx_http_auth_ldap_ctx_t *ctx)
 
     if (!ngx_queue_empty(&server->free_connections)) {
         q = ngx_queue_last(&server->free_connections);
-        ngx_queue_remove(q);
-        c = ngx_queue_data(q, ngx_http_auth_ldap_connection_t, queue);
-        c->rctx = ctx;
-        ctx->c = c;
-        ctx->replied = 0;
-        return 1;
+        if (q != 0) {
+            ngx_queue_remove(q);
+            c = ngx_queue_data(q, ngx_http_auth_ldap_connection_t, queue);
+            c->rctx = ctx;
+            ctx->c = c;
+            ctx->replied = 0;
+            return 1;
+        }
     }
 
     q = ngx_queue_next(&server->waiting_requests);
