@@ -1743,8 +1743,8 @@ ngx_http_auth_ldap_release_connections(ngx_cycle_t *cycle)
         ngx_http_auth_ldap_close_connection(c->data);
         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap-test: Connection closed: %d", i);
     }*/
-    ngx_destroy_pool(cycle->pool);
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap-test: Pool destroyed %s", "");
+    //ngx_destroy_pool(cycle->pool);
+    //ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap-test: Pool destroyed %s", "");
     return NGX_OK;
 
 //    ngx_http_auth_ldap_close_connection
