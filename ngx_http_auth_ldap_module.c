@@ -201,11 +201,13 @@ static char * ngx_http_auth_ldap_init_main_conf(ngx_conf_t *cf, void *parent);
 static void * ngx_http_auth_ldap_create_loc_conf(ngx_conf_t *);
 static char * ngx_http_auth_ldap_merge_loc_conf(ngx_conf_t *, void *, void *);
 static ngx_int_t ngx_http_auth_ldap_init_worker(ngx_cycle_t *cycle);
+static void ngx_http_auth_ldap_exit_worker(ngx_cycle_t *cycle);
 static ngx_int_t ngx_http_auth_ldap_init(ngx_conf_t *cf);
 static ngx_int_t ngx_http_auth_ldap_init_cache(ngx_cycle_t *cycle);
 static void ngx_http_auth_ldap_close_connection(ngx_http_auth_ldap_connection_t *c);
 static void ngx_http_auth_ldap_read_handler(ngx_event_t *rev);
 static ngx_int_t ngx_http_auth_ldap_init_connections(ngx_cycle_t *cycle);
+static ngx_int_t ngx_http_auth_ldap_release_connections(ngx_cycle_t *cycle);
 static ngx_int_t ngx_http_auth_ldap_handler(ngx_http_request_t *r);
 static ngx_int_t ngx_http_auth_ldap_authenticate(ngx_http_request_t *r, ngx_http_auth_ldap_ctx_t *ctx,
         ngx_http_auth_ldap_loc_conf_t *conf);
@@ -301,7 +303,7 @@ ngx_module_t ngx_http_auth_ldap_module = {
     ngx_http_auth_ldap_init_worker,      /* init process */
     NULL,                                /* init thread */
     NULL,                                /* exit thread */
-    NULL,                                /* exit process */
+    ngx_http_auth_ldap_exit_worker,      /* exit process */
     NULL,                                /* exit master */
     NGX_MODULE_V1_PADDING
 };
@@ -837,6 +839,12 @@ ngx_http_auth_ldap_init_worker(ngx_cycle_t *cycle)
     }
 
     return NGX_OK;
+}
+
+static void 
+ngx_http_auth_ldap_exit_worker(ngx_cycle_t *cycle)
+{
+    ngx_http_auth_ldap_release_connections(cycle);
 }
 
 /**
@@ -1718,7 +1726,21 @@ ngx_http_auth_ldap_init_connections(ngx_cycle_t *cycle)
     return NGX_OK;
 }
 
+static ngx_int_t
+ngx_http_auth_ldap_release_connections(ngx_cycle_t *cycle)
+{
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap-test: Releasing connections. %s", "");
 
+    ngx_uint_t i;
+
+    for (i = 0; i < cycle->connection_n; i++) {
+        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap-test: Closing connection: %d", i);
+        ngx_http_auth_ldap_close_connection(cycle->connections[i].data);
+    }
+    return NGX_OK;
+
+//    ngx_http_auth_ldap_close_connection
+}
 
 /*** Per-request authentication processing ***/
 
