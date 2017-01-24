@@ -1730,13 +1730,21 @@ static ngx_int_t
 ngx_http_auth_ldap_release_connections(ngx_cycle_t *cycle)
 {
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap-test: Releasing connections. %s", "");
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap-test: Number of connections: %d", cycle->connection_n);
 
-    ngx_uint_t i;
+    //ngx_uint_t i;
+    //ngx_connection_t *c;
 
-    for (i = 0; i < cycle->connection_n; i++) {
+    /*for (i = 0; i < cycle->connection_n; i++) {
         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap-test: Closing connection: %d", i);
-        ngx_http_auth_ldap_close_connection(cycle->connections[i].data);
-    }
+        c = &cycle->free_connections[i];
+        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap-test: Connection data: %V", c);
+
+        ngx_http_auth_ldap_close_connection(c->data);
+        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap-test: Connection closed: %d", i);
+    }*/
+    ngx_destroy_pool(cycle->pool);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap-test: Pool destroyed %s", "");
     return NGX_OK;
 
 //    ngx_http_auth_ldap_close_connection
